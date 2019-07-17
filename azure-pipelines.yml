@@ -10,10 +10,8 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: AzurePowerShell@4
+  inputs:
+    ScriptType: 'FilePath'
+    ScriptPath: 'https://raw.githubusercontent.com/ArpanBalpande/azure-pipelines-image-generation/master/helpers/GenerateResourcesAndImage.ps1'
+    azurePowerShellVersion: 'LatestVersion'
