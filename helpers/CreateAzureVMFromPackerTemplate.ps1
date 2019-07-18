@@ -53,6 +53,7 @@ Function CreateAzureVMFromPackerTemplate {
     $nicName = $env:UserName + [System.GUID]::NewGuid().ToString().ToUpper()
     $publicIpName = $env:UserName + [System.GUID]::NewGuid().ToString().ToUpper()
 
+    az login -u "arpan.balpande1@hotmail.com" -p "NeverQuit@22"
     Write-Host "Creating a Vnet and a Subnet"
     az network vnet create -g $ResourceGroupName -l $AzureLocation --name $vnetName --address-prefix 10.0.0.0/16 --subscription $subscriptionId
     az network vnet subnet create -g $ResourceGroupName --vnet-name $vnetName -n $subnetName --address-prefix 10.0.1.0/24  --subscription $subscriptionId
@@ -70,3 +71,4 @@ Function CreateAzureVMFromPackerTemplate {
     Write-Host "Creating the VM"
     az group deployment create --resource-group $ResourceGroupName --subscription $subscriptionId --name $VirtualMachineName --template-file $templateFilePath --parameters vmSize=$vmSize vmName=$VirtualMachineName adminUserName=$AdminUsername adminPassword=$AdminPassword networkInterfaceId=$networkId
 }
+CreateAzureVMFromPackerTemplate -SubscriptionId 3e92397a-621d-49a2-9e9e-377efe86e2b3  -ResourceGroupName "arpanpacker" -TemplateFile "C:\Users\arpan.balpande\Documents\SelfHostedAgent\packer-vmTemplate.4986505c-69fe-4894-b0b1-830a291e6e6d.json" -VirtualMachineName "deeresha" -AdminUsername "arpanbalpande" -AdminPassword "JohnDeere@22" -AzureLocation "eastus"

@@ -14,7 +14,7 @@ Function Get-PackerTemplatePath {
         [Parameter(Mandatory = $True)]
         [ImageType] $ImageType
     )
-    
+
     $relativePath = "N/A"
 
     switch ($ImageType) {
@@ -73,12 +73,15 @@ Function GenerateResourcesAndImage {
         [Parameter(Mandatory = $True)]
         [string] $AzureLocation
     )
-    
+
     $builderScriptPath = Get-PackerTemplatePath -RepositoryRoot $ImageGenerationRepositoryRoot -ImageType $ImageType
-    $ServicePrincipalClientSecret = $env:UserName + [System.GUID]::NewGuid().ToString().ToUpper();
+    #$ServicePrincipalClientSecret = $env:UserName + [System.GUID]::NewGuid().ToString().ToUpper();
     $InstallPassword = $env:UserName + [System.GUID]::NewGuid().ToString().ToUpper();
 
-    Login-AzureRmAccount
+    $User = "arpan.balpande1@hotmail.com"
+    $PWord = ConvertTo-SecureString -String "NeverQuit@22" -AsPlainText -Force
+    $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $User, $PWord
+    Login-AzAccount -Credential $Credential
     Set-AzureRmContext -SubscriptionId $SubscriptionId
 
     $alreadyExists = $true;
@@ -103,7 +106,11 @@ Function GenerateResourcesAndImage {
     New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -AccountName $storageAccountName -Location $AzureLocation -SkuName "Standard_LRS"
 
     $spDisplayName = [System.GUID]::NewGuid().ToString().ToUpper()
-    $sp = New-AzureRmADServicePrincipal -DisplayName $spDisplayName -Password (ConvertTo-SecureString $ServicePrincipalClientSecret -AsPlainText -Force)
+    #$sp = New-AzureRmADServicePrincipal -DisplayName $spDisplayName -Password (ConvertTo-SecureString $ServicePrincipalClientSecret -AsPlainText -Force)
+    $sp = New-AzADServicePrincipal -DisplayName $spDisplayName
+    $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($sp.Secret)
+    $PlainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+    $PlainPassword
 
     $spAppId = $sp.ApplicationId
     $spClientId = $sp.ApplicationId
@@ -115,5 +122,6 @@ Function GenerateResourcesAndImage {
     $tenantId = $sub.TenantId
     # "", "Note this variable-setting script for running Packer with these Azure resources in the future:", "==============================================================================================", "`$spClientId = `"$spClientId`"", "`$ServicePrincipalClientSecret = `"$ServicePrincipalClientSecret`"", "`$SubscriptionId = `"$SubscriptionId`"", "`$tenantId = `"$tenantId`"", "`$spObjectId = `"$spObjectId`"", "`$AzureLocation = `"$AzureLocation`"", "`$ResourceGroupName = `"$ResourceGroupName`"", "`$storageAccountName = `"$storageAccountName`"", "`$install_password = `"$install_password`"", ""
 
-    packer.exe build -on-error=ask -var "client_id=$($spClientId)" -var "client_secret=$($ServicePrincipalClientSecret)" -var "subscription_id=$($SubscriptionId)" -var "tenant_id=$($tenantId)" -var "object_id=$($spObjectId)" -var "location=$($AzureLocation)" -var "resource_group=$($ResourceGroupName)" -var "storage_account=$($storageAccountName)" -var "install_password=$($InstallPassword)" $builderScriptPath
+    packer.exe build -on-error=ask -var "client_id=$($spClientId)" -var "client_secret=$($PlainPassword)" -var "subscription_id=$($SubscriptionId)" -var "tenant_id=$($tenantId)" -var "object_id=$($spObjectId)" -var "location=$($AzureLocation)" -var "resource_group=$($ResourceGroupName)" -var "storage_account=$($storageAccountName)" -var "install_password=$($InstallPassword)" $builderScriptPath
 }
+GenerateResourcesAndImage -SubscriptionId 3e92397a-621d-49a2-9e9e-377efe86e2b3 -ResourceGroupName "arpanpacker" -ImageGenerationRepositoryRoot "C:\Users\arpan.balpande\Documents\SelfHostedAgent\azure-pipelines-image-generation" -ImageType VS2017 -AzureLocation "East US"
