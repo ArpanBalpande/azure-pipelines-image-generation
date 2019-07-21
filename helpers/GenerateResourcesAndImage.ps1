@@ -78,13 +78,13 @@ Function GenerateResourcesAndImage {
     #$ServicePrincipalClientSecret = $env:UserName + [System.GUID]::NewGuid().ToString().ToUpper();
     $InstallPassword = $env:UserName + [System.GUID]::NewGuid().ToString().ToUpper();
 
-    $User = "arpan.balpande1@hotmail.com"
+    $User = "arpan.balpande@yashtechnologies841.onmicrosoft.com"
     $PWord = ConvertTo-SecureString -String "NeverQuit@22" -AsPlainText -Force
     $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $User, $PWord
     Login-AzAccount -Credential $Credential
     Set-AzureRmContext -SubscriptionId $SubscriptionId
 
-    $alreadyExists = $true;
+    <# $alreadyExists = $true;
     try {
         Get-AzureRmResourceGroup -Name $ResourceGroupName
         $alreadyExists = $true
@@ -100,9 +100,9 @@ Function GenerateResourcesAndImage {
         Remove-AzureRmResourceGroup -Name $ResourceGroupName -Force
     }
 
-    New-AzureRmResourceGroup -Name $ResourceGroupName -Location $AzureLocation
+    New-AzureRmResourceGroup -Name $ResourceGroupName -Location $AzureLocation #>
 
-    $storageAccountName = $ResourceGroupName
+    $storageAccountName = "selfhostedsa"
     New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -AccountName $storageAccountName -Location $AzureLocation -SkuName "Standard_LRS"
 
     $spDisplayName = [System.GUID]::NewGuid().ToString().ToUpper()
@@ -124,4 +124,4 @@ Function GenerateResourcesAndImage {
 
     packer.exe build -on-error=ask -var "client_id=$($spClientId)" -var "client_secret=$($PlainPassword)" -var "subscription_id=$($SubscriptionId)" -var "tenant_id=$($tenantId)" -var "object_id=$($spObjectId)" -var "location=$($AzureLocation)" -var "resource_group=$($ResourceGroupName)" -var "storage_account=$($storageAccountName)" -var "install_password=$($InstallPassword)" $builderScriptPath
 }
-GenerateResourcesAndImage -SubscriptionId 3e92397a-621d-49a2-9e9e-377efe86e2b3 -ResourceGroupName "arpanpacker" -ImageGenerationRepositoryRoot "C:\Users\arpan.balpande\Documents\SelfHostedAgent\azure-pipelines-image-generation" -ImageType VS2017 -AzureLocation "East US"
+GenerateResourcesAndImage -SubscriptionId 15d52c2f-91c7-4f5e-baa9-bb911a05aae3 -ResourceGroupName "innovationgroup-azuredevops-ECIF-JD" -ImageGenerationRepositoryRoot "C:\Users\arpan.balpande\Documents\SelfHostedAgent\azure-pipelines-image-generation" -ImageType Ubuntu1604 -AzureLocation "East US"
